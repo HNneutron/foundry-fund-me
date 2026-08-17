@@ -45,6 +45,23 @@ contract FundMe {
         _;
     }
 
+    function cheaperWithdraw() public onlyOwner {
+        uint256 fundersLength = s_funders.length;
+        for (
+            uint256 funderIndex = 0;
+            funderIndex < fundersLength;
+            funderIndex++
+        ) {
+            address funder = s_funders[funderIndex];
+            s_addressToAmountFunded[funder] = 0;
+        }
+        s_funders = new address[](0);
+        (bool callSuccess, ) = payable(msg.sender).call{
+            value: address(this).balance
+        }("");
+        require(callSuccess, "Call failed");
+    }
+
     function withdraw() public onlyOwner {
         for (
             uint256 funderIndex = 0;
@@ -96,15 +113,13 @@ contract FundMe {
         return s_addressToAmountFunded[fundingAddress];
     }
 
-    function getFunder(uint256 index) external view returns(address) {
+    function getFunder(uint256 index) external view returns (address) {
         return s_funders[index];
     }
 
-    function getOwner() external view returns(address){
+    function getOwner() external view returns (address) {
         return i_owner;
     }
-
-
 }
 
 // Concepts we didn't cover yet (will cover in later sections)
